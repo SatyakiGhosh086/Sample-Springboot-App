@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.practice.SampleSpringBootApplication.DTO.TestModelDTO;
 import com.practice.SampleSpringBootApplication.Entity.TestEntity;
 import com.practice.SampleSpringBootApplication.Service.TestEntityService;
 
@@ -22,9 +23,9 @@ public class TestEntityController
 	private TestEntityService testEntityService;
 	
 	@RequestMapping(method = RequestMethod.POST,value = "/test/addStudent")
-	public ResponseEntity<String> addStudent(@RequestBody TestEntity testEntity)
+	public ResponseEntity<String> addStudent(@RequestBody TestModelDTO testModelDto)
 	{
-		return testEntityService.addStudent(testEntity);
+		return testEntityService.addStudent(testModelDto);
 	}
 	
 	@RequestMapping(method = RequestMethod.GET,value = "/test/student/{studentId}/get")
@@ -52,8 +53,8 @@ public class TestEntityController
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT,value = "/test/student/{studentId}/update")
-	public ResponseEntity<String> updateStudentByStudentId(@PathVariable int studentId, @RequestBody TestEntity updatedTestEntity)
+	public ResponseEntity<String> updateStudentByStudentId(@PathVariable int studentId, @RequestBody TestModelDTO updatedTestModel)
 	{
-		return testEntityService.updateStudentById(studentId, updatedTestEntity);
+		return testEntityService.updateStudentById(studentId, updatedTestModel);
 	}
 }

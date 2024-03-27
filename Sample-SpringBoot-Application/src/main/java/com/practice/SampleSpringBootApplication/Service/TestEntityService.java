@@ -4,11 +4,13 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.practice.SampleSpringBootApplication.DTO.TestModelDTO;
 import com.practice.SampleSpringBootApplication.Entity.TestEntity;
 import com.practice.SampleSpringBootApplication.Repository.TestEntityRepository;
 
@@ -18,10 +20,16 @@ public class TestEntityService
 	@Autowired
 	private TestEntityRepository testEntityRepository;
 	
-	public ResponseEntity<String> addStudent(TestEntity testEntity)
+	@Autowired
+	private ModelMapper modelMapper;
+	
+	public ResponseEntity<String> addStudent(TestModelDTO testModelDto)
 	{
+		TestEntity testEntity = modelMapper.map(testModelDto, TestEntity.class);
 		testEntityRepository.save(testEntity);
-		return new ResponseEntity<>(testEntity.toString(),HttpStatus.OK);
+		
+		testModelDto = modelMapper.map(testEntity, TestModelDTO.class);
+		return new ResponseEntity<>(testModelDto.toString(),HttpStatus.OK);
 	}
 	
 	public TestEntity getByStudentId(int studentId)
@@ -47,14 +55,16 @@ public class TestEntityService
 		return new ResponseEntity<>("Student entry has been deleted : "+studentId,HttpStatus.OK);
 	}
 	
-	public ResponseEntity<String> updateStudentById(int studentId, TestEntity updatedTestEntity)
+	public ResponseEntity<String> updateStudentById(int studentId, TestModelDTO updatedTestModel)
 	{
 		TestEntity testEntity = testEntityRepository.findByStudentId(studentId);
-		testEntity.setFirstName(updatedTestEntity.getFirstName());
-		testEntity.setLastName(updatedTestEntity.getLastName());
-		testEntity.setDeptId(updatedTestEntity.getDeptId());
+		testEntity.setFirstName(updatedTestModel.getFirstName());
+		testEntity.setLastName(updatedTestModel.getLastName());
+		testEntity.setDeptId(updatedTestModel.getDeptId());
 		
 		testEntityRepository.save(testEntity);
+		
+		TestModelDTO testModelDto = modelMapper.map(testEntity, TestModelDTO.class);
 		
 		return new ResponseEntity<>("Student Entry has been updated : "+studentId,HttpStatus.OK);
 	}
