@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.practice.SampleSpringBootApplication.DTO.TestModelDTO;
 import com.practice.SampleSpringBootApplication.Entity.TestEntity;
+import com.practice.SampleSpringBootApplication.Exception.ResourceNotFoundException;
 import com.practice.SampleSpringBootApplication.Repository.TestEntityRepository;
 
 @Service
@@ -32,9 +33,12 @@ public class TestEntityService
 		return new ResponseEntity<>(testModelDto.toString(),HttpStatus.OK);
 	}
 	
-	public TestEntity getByStudentId(int studentId)
+	public TestEntity getByStudentId(int studentId) throws ResourceNotFoundException
 	{
-		return testEntityRepository.findByStudentId(studentId);
+		if(testEntityRepository.findByStudentId(studentId) == null)
+			throw new ResourceNotFoundException("Student","Student ID",studentId);
+		else
+			return testEntityRepository.findByStudentId(studentId);
 	}
 	
 	public List<TestEntity> getAllStudentsByDeptId(int deptId)
@@ -49,23 +53,42 @@ public class TestEntityService
 		return testEntityRepository.findByStudentIdAndDeptId(studentId, deptId);
 	}
 	
-	public ResponseEntity<String> deleteStudentById(int studentId)
+	public ResponseEntity<String> deleteStudentById(int studentId) throws ResourceNotFoundException
 	{
-		testEntityRepository.deleteById(studentId);
-		return new ResponseEntity<>("Student entry has been deleted : "+studentId,HttpStatus.OK);
+		ResponseEntity<String> response = null;
+		if(testEntityRepository.findByStudentId(studentId) == null)
+			throw new ResourceNotFoundException("Student","Student Id",studentId);
+		else
+		{
+			testEntityRepository.deleteById(studentId);
+			response = new ResponseEntity<>("Student entry has been deleted : "+studentId,HttpStatus.OK);
+		}
+			
+		return response;
 	}
 	
-	public ResponseEntity<String> updateStudentById(int studentId, TestModelDTO updatedTestModel)
+	public ResponseEntity<String> updateStudentById(int studentId, TestModelDTO updatedTestModel) throws ResourceNotFoundException
 	{
+		ResponseEntity<String> response = null;
 		TestEntity testEntity = testEntityRepository.findByStudentId(studentId);
-		testEntity.setFirstName(updatedTestModel.getFirstName());
-		testEntity.setLastName(updatedTestModel.getLastName());
-		testEntity.setDeptId(updatedTestModel.getDeptId());
+		if(testEntity == null)
+		{
+			throw new ResourceNotFoundException("Student","Student Id",studentId);
+		}
+		else
+		{
+			testEntity.setFirstName(updatedTestModel.getFirstName());
+			testEntity.setLastName(updatedTestModel.getLastName());
+			testEntity.setDeptId(updatedTestModel.getDeptId());
+			
+			testEntityRepository.save(testEntity);
+			
+			TestModelDTO testModelDto = modelMapper.map(testEntity, TestModelDTO.class);
+			
+			response = new ResponseEntity<>("Student Entry has been updated : "+studentId,HttpStatus.OK);
+		}
 		
-		testEntityRepository.save(testEntity);
 		
-		TestModelDTO testModelDto = modelMapper.map(testEntity, TestModelDTO.class);
-		
-		return new ResponseEntity<>("Student Entry has been updated : "+studentId,HttpStatus.OK);
+		return response;
 	}
 }

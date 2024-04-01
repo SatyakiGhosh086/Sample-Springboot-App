@@ -1,19 +1,25 @@
 package com.practice.SampleSpringBootApplication.Controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.ws.rs.QueryParam;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.WebRequest;
 
 import com.practice.SampleSpringBootApplication.DTO.TestModelDTO;
 import com.practice.SampleSpringBootApplication.Entity.TestEntity;
+import com.practice.SampleSpringBootApplication.Exception.ErrorDetails;
+import com.practice.SampleSpringBootApplication.Exception.ResourceNotFoundException;
 import com.practice.SampleSpringBootApplication.Service.TestEntityService;
 
 @RestController
@@ -56,5 +62,15 @@ public class TestEntityController
 	public ResponseEntity<String> updateStudentByStudentId(@PathVariable int studentId, @RequestBody TestModelDTO updatedTestModel)
 	{
 		return testEntityService.updateStudentById(studentId, updatedTestModel);
+	}
+	
+	@ExceptionHandler(ResourceNotFoundException.class)
+	public ResponseEntity<ErrorDetails> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest webRequest)
+	{
+		ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(),
+				ex.getMessage(),
+				webRequest.getDescription(false),
+				"USER_NOT_FOUND");
+		return new ResponseEntity<>(errorDetails,HttpStatus.NOT_FOUND);
 	}
 }
