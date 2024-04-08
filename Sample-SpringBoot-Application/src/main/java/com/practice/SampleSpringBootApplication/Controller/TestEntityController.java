@@ -1,5 +1,6 @@
 package com.practice.SampleSpringBootApplication.Controller;
 
+import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -35,9 +36,10 @@ public class TestEntityController
 	}
 	
 	@RequestMapping(method = RequestMethod.GET,value = "/test/student/{studentId}/get")
-	public TestEntity getByStudentId(@PathVariable int studentId)
+	public ResponseEntity<TestEntity> getByStudentId(@PathVariable int studentId)
 	{
-		return testEntityService.getByStudentId(studentId);
+		TestEntity testObj = testEntityService.getByStudentId(studentId);
+		return new ResponseEntity<>(testObj,HttpStatus.OK);
 	}
 	
 	@RequestMapping(method = RequestMethod.GET,value = "/test/student/all/dept/{deptId}/get")
